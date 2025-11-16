@@ -2,6 +2,7 @@
 # PROGRAMME PRINCIPAL : point_fixe.py
 # ================================
 import sympy as sp
+from pointfixe import solpointfixe
 from dichotomie import dicho
 from pointfixe import solve_point_fixe
 from balayage import balayage
