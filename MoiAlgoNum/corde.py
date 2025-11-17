@@ -51,34 +51,26 @@ def donnee():
 # ----------------------------------------------------------
 # 4. Dichotomie
 # ----------------------------------------------------------
-def dichosol():
+def cordesol():
     f_sympy = fonction()
     f = sp.lambdify(x, f_sympy, "numpy")   # fonction numérique
 
-    def dicho(a, b, eps):
+    def corde(x0, x1, eps):
         # Vérification du changement de signe
-        if f(a) * f(b) > 0:
-            print(f"⚠ Pas de changement de signe sur [{a}, {b}].")
+        if f(x0) * f(x1) > 0:
+            print(f"⚠ Pas de changement de signe sur [{x0}, {x1}].")
             return None
 
-        while abs(b - a) > eps:
-            m = (a + b) / 2
-
-            if f(m) == 0:     # racine exacte
-                return m
-
-            if f(a) * f(m) < 0:
-                b = m
-            else:
-                a = m
-
-        return (a + b) / 2
+        while abs(x1 - x0) > eps:
+            x2 = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+            x0, x1 = x1, x2
+        return x1
 
     # Récupération des données
     a, b = donnee()
     eps = precision()
     a, b = balayage(f, a, b, h=0.1)
-    sol = dicho(a, b, eps)
+    sol = corde(a, b, eps)
 
     if sol is not None:
         print(f"\n✔ Racine approchée : {sol}")

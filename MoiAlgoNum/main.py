@@ -4,6 +4,7 @@
 import sympy as sp
 from pointfixe import ptfixe
 from dichotomie import dichosol
+from corde import cordesol
 
 x = sp.Symbol('x')
 global expr_str, inf, supr, h, eps,interval
@@ -31,7 +32,7 @@ def menu():
         elif choix == "3":
             pass
         elif choix == "4":
-           pass
+            cordesol()
         elif choix == "5":
             pass
         else:
