@@ -4,8 +4,8 @@
 
 import sympy as sp
 import numpy as np
+from _balayage import balayage
 
-from balayage import balayage
 def ptfixe():
     # ----------------------------------------------------------
     # 1. Lecture et préparation de f(x)

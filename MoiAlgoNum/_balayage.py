@@ -1,5 +1,5 @@
 # ================================
-# MODULE : balayage.py
+# MODULE : _balayage.py
 # ================================
 import numpy as np
 

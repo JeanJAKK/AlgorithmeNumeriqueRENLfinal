@@ -1,4 +1,6 @@
 import sympy as sp
+from _balayage import balayage
+
 
 x = sp.Symbol('x')
 
@@ -75,11 +77,12 @@ def dichosol():
     # Récupération des données
     a, b = donnee()
     eps = precision()
-
+    a, b = balayage(f, a, b, h=0.1)
     sol = dicho(a, b, eps)
 
     if sol is not None:
         print(f"\n✔ Racine approchée : {sol}")
         print(f"   f({sol}) = {f(sol)}")
+        print(a,b)
     else:
         print("❌ Aucune solution trouvée sur cet intervalle.")
