@@ -18,17 +18,16 @@ def menu():
         print("1 - Point Fixe")
         print("2 - Dichotomie")
         print("3 - Newton-Raphson")
-        print("4 - Sécante")
+        print("4 - Corde")
         print("5 - Toutes les méthodes")
         print("0. Quitter")
 
         choix = input("\nChoisir une méthode : ")
 
         if choix == "1":
-             ptfixe()
+            ptfixe()
         elif choix == "2":
             dichosol()
-            pass
         elif choix == "3":
             pass
         elif choix == "4":
