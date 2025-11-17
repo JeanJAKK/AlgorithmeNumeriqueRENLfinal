@@ -12,7 +12,7 @@ def balayage(f, inf, supr, h):
             y1 = f(x0)
             y2 = f(x0 + h)
 
-            # Ignore NaN, infinities ou poles
+            # Ignore NaN, infinies
             if np.isnan(y1) or np.isnan(y2) or np.isinf(y1) or np.isinf(y2):
                 x0 += h
                 continue
