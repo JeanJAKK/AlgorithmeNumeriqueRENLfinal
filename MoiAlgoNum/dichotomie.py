@@ -83,6 +83,5 @@ def dichosol():
     if sol is not None:
         print(f"\n✔ Racine approchée : {sol}")
         print(f"   f({sol}) = {f(sol)}")
-        print(a,b)
     else:
         print("❌ Aucune solution trouvée sur cet intervalle.")
