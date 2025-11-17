@@ -4,7 +4,6 @@
 
 import sympy as sp
 import numpy as np
-from pyexpat.errors import messages
 
 from balayage import balayage
 def ptfixe():
@@ -157,7 +156,8 @@ def ptfixe():
 
         if solution is None:
             return None, "Échec de convergence."
-        print(f"Intervalle utilisé : {interval}, g(x) choisie : {safe_g[0]}")
-        print(f"🎯 Solution approchée : x ≈ {solution}")
+        a = f"Intervalle utilisé : {interval}, g(x) choisie : {safe_g[0]}",
+        b = f"🎯 Solution approchée : x ≈ {solution}"
+        return a, b
 
     solve_point_fixe(f_num, inf, supr, h, eps)

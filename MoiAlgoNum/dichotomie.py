@@ -1,38 +1,85 @@
 import sympy as sp
-from balayage import balayage
+
+x = sp.Symbol('x')
+
+# ----------------------------------------------------------
+# 1. Lecture et préparation de f(x)
+# ----------------------------------------------------------
+def fonction():
+    f_str = input("Expression de la fonction f(x) = ")
+    try:
+        f_sympy = sp.sympify(f_str)
+    except Exception as e:
+        print("❌ Fonction invalide :", e)
+        exit()
+    return f_sympy
+
+
+# ----------------------------------------------------------
+# 2. Lecture de la précision
+# ----------------------------------------------------------
+def precision():
+    while True:
+        try:
+            eps = float(input("Précision (ex: 1e-6) : "))
+            return abs(eps)
+        except ValueError:
+            print("❌ Valeur invalide.")
+
+
+# ----------------------------------------------------------
+# 3. Lecture des bornes
+# ----------------------------------------------------------
+def donnee():
+    while True:
+        try:
+            a = float(input("Borne inférieure : "))
+            b = float(input("Borne supérieure : "))
+
+            if b <= a:
+                print("⚠ La borne supérieure doit être > à la borne inférieure.")
+                continue
+
+            return a, b
+
+        except ValueError:
+            print("❌ Saisie invalide.")
+
+
+# ----------------------------------------------------------
+# 4. Dichotomie
+# ----------------------------------------------------------
 def dichosol():
+    f_sympy = fonction()
+    f = sp.lambdify(x, f_sympy, "numpy")   # fonction numérique
 
-    def dicho(expr_str, interval, eps, max_iter=100):
-
-        x = sp.Symbol('x')
-        f = sp.lambdify(x, sp.sympify(expr_str), "numpy")
-
-        # Si l’utilisateur n’a pas donné d’intervalle, balayage automatique
-        if interval is None:
-            intervs = balayage(expr_str)
-            if not intervs:
-                raise ValueError("Aucun intervalle valable trouvé (pas de changement de signe).")
-            print("Intervalles trouvés :", intervs)
-            interval = intervs[0]      # on prend le premier intervalle trouvé
-
-        a, b = interval
-
+    def dicho(a, b, eps):
+        # Vérification du changement de signe
         if f(a) * f(b) > 0:
-            raise ValueError("L’intervalle choisi ne respecte pas f(a)*f(b) < 0.")
+            print(f"⚠ Pas de changement de signe sur [{a}, {b}].")
+            return None
 
-        print(f"Intervalle utilisé : [{a}, {b}]")
-
-        # --- Algorithme de dichotomie ---
-        for i in range(max_iter):
+        while (b - a) > eps:
             m = (a + b) / 2
-            fm = f(m)
 
-            if abs(fm) < eps or (b - a)/2 < eps:
+            if f(m) == 0:     # racine exacte
                 return m
 
-            if f(a) * fm < 0:
+            if f(a) * f(m) < 0:
                 b = m
             else:
                 a = m
 
-        return m  # meilleure approximation après max_iter
+        return (a + b) / 2
+
+    # Récupération des données
+    a, b = donnee()
+    eps = precision()
+
+    sol = dicho(a, b, eps)
+
+    if sol is not None:
+        print(f"\n✔ Racine approchée : {sol}")
+        print(f"   f({sol}) = {f(sol)}")
+    else:
+        print("❌ Aucune solution trouvée sur cet intervalle.")

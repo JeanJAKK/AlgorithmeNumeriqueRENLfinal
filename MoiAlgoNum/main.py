@@ -3,7 +3,7 @@
 # ================================
 import sympy as sp
 from pointfixe import ptfixe
-#from dichotomie import dicho
+from dichotomie import dichosol
 
 x = sp.Symbol('x')
 global expr_str, inf, supr, h, eps,interval
@@ -22,12 +22,12 @@ def menu():
         print("5 - Toutes les méthodes")
         print("0. Quitter")
 
-        choix = input("Choisir une méthode : ")
+        choix = input("\nChoisir une méthode : ")
 
         if choix == "1":
              ptfixe()
         elif choix == "2":
-            #dichosol()
+            dichosol()
             pass
         elif choix == "3":
             pass
