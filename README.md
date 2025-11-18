@@ -44,4 +44,4 @@ Installation des dépendances :
 pip install sympy numpy
 ```
 
-## Auteur  Syntroπ_dev
+## Syntroπ_dev JeanJAKK
