@@ -42,3 +42,6 @@ Le programme nécessite les bibliothèques Python suivantes :
 Installation des dépendances :
 ```bash
 pip install sympy numpy
+
+
+## Auteur  Syntroπ_dev
