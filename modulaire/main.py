@@ -3,7 +3,7 @@
 # ================================
 import sympy as sp
 
-from MoiAlgoNum.newton_raphson import newsonsol
+from modulaire.newton_raphson import newsonsol
 from pointfixe import ptfixe
 from dichotomie import dichosol
 from corde import cordesol
