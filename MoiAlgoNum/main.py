@@ -1,7 +1,9 @@
 # ================================
-# PROGRAMME PRINCIPAL : point_fixe.py
+# PROGRAMME PRINCIPAL
 # ================================
 import sympy as sp
+
+from MoiAlgoNum.newton_raphson import newsonsol
 from pointfixe import ptfixe
 from dichotomie import dichosol
 from corde import cordesol
@@ -30,11 +32,14 @@ def menu():
         elif choix == "2":
             dichosol()
         elif choix == "3":
-            pass
+            newsonsol()
         elif choix == "4":
             cordesol()
         elif choix == "5":
-            pass
+            ptfixe()
+            dichosol()
+            newsonsol()
+            cordesol()
         else:
             exit()
 

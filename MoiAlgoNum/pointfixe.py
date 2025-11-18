@@ -6,70 +6,71 @@ import sympy as sp
 import numpy as np
 from _balayage import balayage
 
-def ptfixe():
-    # ----------------------------------------------------------
-    # 1. Lecture et préparation de f(x)
-    # ----------------------------------------------------------
-    x = sp.Symbol('x')
+# ----------------------------------------------------------
+# 1. Lecture et préparation de f(x)
+# ----------------------------------------------------------
+x = sp.Symbol('x')
 
-    def fonction():
-        global expr_str, f_sym
-        expr_str = input("Expression de la fonction (ex: x**2 - 1): ")
+def fonction():
+    global expr_str, f_sym
+    expr_str = input("Expression de la fonction (ex: x**2 - 1): ")
+    try:
+        f_sym = sp.sympify(expr_str)
+    except Exception as e:
+        print("❌ Erreur : fonction invalide.")
+        print(e)
+        exit()
+
+    f_num = sp.lambdify(x, f_sym, 'numpy')
+    return f_num
+
+ # Précision
+def precision():
+    while True:
         try:
-            f_sym = sp.sympify(expr_str)
-        except Exception as e:
-            print("❌ Erreur : fonction invalide.")
-            print(e)
-            exit()
+           eps = input("précision (exemple: 1e-7 ou 0.000001): ")
+           return float(eps)
+        except ValueError:
+           print("La valeur n'est pas valide")
 
-        f_num = sp.lambdify(x, f_sym, 'numpy')
-        return f_num
+# ----------------------------------------------------------
+# 2. Récupération des bornes et du pas
+# ----------------------------------------------------------
+def donnee():
+    while True:
+        try:
+            inf = float(input("Borne inférieure : "))
+            supr = float(input("Borne supérieure : "))
 
-     # Précision
-    def precision():
-        while True:
-            try:
-               eps = input("précision (exemple: 1e-7 ou 0.000001): ")
-               return float(eps)
-            except ValueError:
-               print("La valeur n'est pas valide")
+            if supr <= inf:
+                print("⚠ La borne supérieure doit être > à la borne inférieure.")
+                continue
 
-    # ----------------------------------------------------------
-    # 2. Récupération des bornes et du pas
-    # ----------------------------------------------------------
-    def donnee():
-        while True:
-            try:
-                inf = float(input("Borne inférieure : "))
-                supr = float(input("Borne supérieure : "))
+            return inf, supr  # ← retourne directement les valeurs
 
-                if supr <= inf:
-                    print("⚠ La borne supérieure doit être > à la borne inférieure.")
-                    continue
+        except ValueError:
+            print("❌ Saisie invalide.")
 
-                h = float(input("Pas de balayage h : "))
-                if h <= 0:
-                    print("⚠ Le pas doit être > 0.")
-                    continue
+#------------------------------
+# pas
+#------------------------------
+def pas():
+    while True:
+        try:
+            h = float(input("Pas de balayage h : "))
+            if h <= 0:
+                print("⚠ Le pas doit être > 0.")
+                continue
+            return h
+        except ValueError:
+            print("Saisie invalide.")
 
-                return inf, supr, h  # ← retourne directement les valeurs
-
-            except ValueError:
-                print("❌ Saisie invalide.")
-
-
+def ptfixe():
     # ← on récupère les valeurs ici
     f_num = fonction()
-    inf, supr, h = donnee()
-
-    # Appel du module balayage
-    interval = balayage(f_num, inf, supr, h)
-    if interval is None:
-        print("❌ Aucun changement de signe détecté.")
-        exit()
-    else:
-        print(f"✔ Intervalle détecté : {interval}")
-
+    inf, supr = donnee()
+    h = pas()
+    eps = precision()
 
     # ============================================================
     # 1. Génération automatique de g(x) candidates
@@ -135,20 +136,22 @@ def ptfixe():
     # ----------------------------------------------------------
     # 4. Fonction principale du module
     # ----------------------------------------------------------
-    eps = precision()
     def solve_point_fixe(f_num, inf, supr, h, eps ):
-        """Résout f(x)=0 par la méthode du point fixe + balayage."""
 
-        # Balayage
+        # Appel du module balayage
         interval = balayage(f_num, inf, supr, h)
         if interval is None:
-            return None, "Aucun changement de signe détecté."
+            print("\n❌ Aucun changement de signe détecté.")
+            exit()
+        else:
+            print(f"\n✔ Intervalle détecté : [{interval[0]}, {interval[1]}]")
 
         # Génération et filtrage de g(x)
         g_candidates = generate_g_candidates(f_sym, lambda_val=0.1)
         safe_g = filter_safe_g(g_candidates, interval)
         if not safe_g:
-            return None, "Aucune fonction g(x) valide pour le point fixe."
+            return None, "\nAucune fonction g(x) valide pour le point fixe."
+
 
         # Point initial au milieu de l'intervalle détecté
         x0 = (interval[0] + interval[1]) / 2
@@ -156,8 +159,10 @@ def ptfixe():
 
         if solution is None:
             return None, "Échec de convergence."
-        a = f"Intervalle utilisé : {interval}, g(x) choisie : {safe_g[0]}",
+        a = f"\nLa fonction g(x) choisie : {safe_g[0]}"
         b = f"🎯 Solution approchée : x ≈ {solution}"
-        return a, b
+        print(a)
+        print(b)
+        return None
 
     solve_point_fixe(f_num, inf, supr, h, eps)
