@@ -26,4 +26,4 @@ def balayage(f, inf, supr, h):
 
         x0 += h
 
-    return None
+    return inf, supr
