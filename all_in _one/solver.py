@@ -1,21 +1,14 @@
-# ================================
-# PROGRAMME PRINCIPAL
-# ================================
-import sympy as sp
 import numpy as np
+import sympy as sp
 
-# Déclaration explicite des variables globales pour qu'elles soient accessibles et modifiables
-global f_sympy, a, b, eps, h, x0_newton # J'ajoute 'h' et 'x0_newton' pour la clarté
-
-# Initialisation (bien que l'affectation soit faite dans menu(), c'est une bonne pratique)
+# Initialisation
 f_sympy = None
 a = None
 b = None
 eps = None
 h = None
 x0_newton = None
-x = sp.Symbol('x') # La variable symbolique doit être globale/accessible
-
+x = sp.Symbol('x') # La variable symbolique
 
 #====================================================================
 # Affichage menu et appel des fonctions de récupération des données
@@ -32,7 +25,7 @@ def menu():
         print("3 - Newton-Raphson")
         print("4 - Corde")
         print("5 - Toutes les méthodes")
-        print("0. Quitter")
+        print("0 - Quitter")
 
         choix = input("\nChoisir une méthode : ")
 
@@ -49,8 +42,7 @@ def menu():
         resultat_balayage = balayage(f_num_balayage, inf, supr, h)
 
         if resultat_balayage is None:
-            print("\n❌ Aucun intervalle de changement de signe détecté. Veuillez modifier les bornes ou le pas.")
-            # On recommence la boucle pour un nouveau choix/saisie
+            print("\n Aucun intervalle de changement de signe détecté. Veuillez modifier les bornes ou le pas.")
             continue
         else:
             a, b = resultat_balayage
@@ -84,14 +76,6 @@ def menu():
             exit()
 
 
-#================
-#  main
-#================
-# Lancement du programme
-# La fonction menu() gère maintenant la boucle et la récupération des données.
-# menu() # Décommenter pour exécuter le programme
-
-
 # ================================
 # MODULE : _balayage.py
 # ================================
@@ -100,18 +84,10 @@ def balayage(f, inf, supr, h):
 
     x0 = inf
 
-    # Assurez-vous que les bornes ne sont pas identiques
-    if inf == supr:
-        return None
-
-    # Ajustement pour s'assurer que l'on vérifie tous les intervalles jusqu'à supr
-    while x0 < supr:
-        # Assurer que le dernier point ne dépasse pas supr
-        x_next = min(x0 + h, supr)
-
+    while x0 + h <= supr:
         try:
             y1 = f(x0)
-            y2 = f(x_next)
+            y2 = f(x0 + h)
 
             # Ignore NaN, infinies
             if np.isnan(y1) or np.isnan(y2) or np.isinf(y1) or np.isinf(y2):
@@ -119,7 +95,7 @@ def balayage(f, inf, supr, h):
                 continue
 
             if y1 * y2 < 0:   # changement de signe
-                return x0, x_next
+                return x0, x0 + h
 
         except Exception:
             # En cas d’erreur f(x) → passer au point suivant
@@ -127,18 +103,10 @@ def balayage(f, inf, supr, h):
 
         x0 += h
 
-        # S'assurer qu'on sort bien de la boucle si x0 a dépassé supr
-        if x0 >= supr:
-            break
-
-    return None
-
+    return inf, supr
 # ----------------------------------------------------------
 # 1. Lecture et préparation de f(x)
 # ----------------------------------------------------------
-# x est déjà défini comme global
-# x = sp.Symbol('x')
-
 def fonction():
     f_str = input("Expression de la fonction (ex: x**2 - 1): ")
     try:
@@ -146,7 +114,7 @@ def fonction():
         global x
         f_sympy = sp.sympify(f_str)
     except Exception as e:
-        print("❌ Erreur : fonction invalide.")
+        print(" Erreur : fonction invalide.")
         print(e)
         # On ne quitte pas, on laisse l'utilisateur réessayer via la boucle du menu
         raise # Renvoyer l'erreur pour que menu() la gère
@@ -182,7 +150,7 @@ def donnee():
             return inf, supr  # ← retourne directement les valeurs
 
         except ValueError:
-            print("❌ Saisie invalide (valeur non numérique).")
+            print(" Saisie invalide (valeur non numérique).")
 
 #------------------------------
 # pas
@@ -234,27 +202,11 @@ def ptfixe():
 
         # B) Essayer d’isoler x dans f(x)=0 (si possible)
         try:
-            # Nous utilisons f_sympy qui est global
             sols = sp.solve(expr_str, x)
             for s in sols:
-                # Assurez-vous que 's' est une expression et non une simple valeur si f(x) n'était pas un polynôme simple
-                if s.has(x):
-                     g_candidates_expr.append(sp.simplify(s))
+                g_candidates_expr.append(sp.simplify(s))
         except Exception:
             pass
-
-        # C) Ajouter g(x) = x + f(x) * c, où c est une constante pour les cas simples (non implémenté ici)
-
-        # Nettoyage
-        # Filtrer les expressions qui ne sont pas des expressions symboliques valides si sp.solve a retourné des constantes
-        g_candidates_expr = [sp.simplify(g) for g in g_candidates_expr if isinstance(g, (sp.Expr, sp.Basic))]
-
-        # Ajout d'une autre forme classique si le degré est simple (ex: x=g(x))
-        if f_sympy.has(x**2) and not f_sympy.has(x**3): # Exemple simple pour x^2-C
-             try:
-                 g_candidates_expr.extend([sp.sqrt(f_sympy + x**2 - x), -sp.sqrt(f_sympy + x**2 - x)])
-             except:
-                 pass
 
         return g_candidates_expr
 
@@ -276,11 +228,6 @@ def ptfixe():
                 # Condition de convergence |g'(x)| < 1
                 if abs(dpi) >= 1:
                     return False
-            # Une vérification supplémentaire pour s'assurer que g(x) reste dans l'intervalle si possible
-            # g_min = min(g_num(xs))
-            # g_max = max(g_num(xs))
-            # if not (g_min >= interval[0] and g_max <= interval[1]):
-            #     return False
 
             return True
         except Exception:
@@ -319,7 +266,7 @@ def ptfixe():
 
         print("\n--- Point Fixe ---")
         if not safe_g:
-            print("\n❌ Aucune fonction g(x) valide (|g'(x)| < 1) trouvée pour le point fixe sur l'intervalle.")
+            print("\n Aucune fonction g(x) valide (|g'(x)| < 1) trouvée pour le point fixe sur l'intervalle.")
             return
 
         # Point initial au milieu de l'intervalle détecté
@@ -327,11 +274,11 @@ def ptfixe():
         solution = point_fixe(safe_g[0], x0, eps)
 
         if solution is None:
-            print("❌ Échec de convergence de la méthode du point fixe.")
+            print(" Échec de convergence de la méthode du point fixe.")
             return
 
         print(f"\nLa fonction g(x) choisie : {safe_g[0]}")
-        print(f"🎯 Solution approchée : x ≈ {solution}")
+        print(f" Solution approchée : x ≈ {solution}")
         print(f"   f({solution}) = {f_num(solution)}") # Vérification de f(sol)
 
     # La fonction menu() s'assure que a, b, eps sont définis
@@ -358,7 +305,6 @@ def dichosol():
              try:
                  fm = f(m)
              except Exception:
-                 # Si f(m) n'est pas calculable (ex: domaine de définition), on sort
                  return None
 
              if np.isnan(fm) or np.isinf(fm):
@@ -382,7 +328,7 @@ def dichosol():
         print(f"✔ Racine approchée : x ≈ {sol}")
         print(f"   f({sol}) = {f(sol)}")
     else:
-        print("❌ Aucune solution trouvée sur cet intervalle par dichotomie (problème de signe ou de domaine).")
+        print(" Aucune solution trouvée sur cet intervalle par dichotomie (problème de signe ou de domaine).")
 
 # Newton-Raphson
 def newsonsol(x0_init):
@@ -422,7 +368,7 @@ def newsonsol(x0_init):
         print(f"✔ Racine approchée : x ≈ {sol}")
         print(f"   f({sol}) = {f(sol)}")
     else:
-        print("❌ Échec de convergence (dérivée nulle, NaN, ou max_iter atteint).")
+        print(" Échec de convergence (dérivée nulle, NaN, ou max_iter atteint).")
 
 # Corde
 def cordesol():
@@ -431,7 +377,7 @@ def cordesol():
     f = sp.lambdify(x, f_sympy, "numpy")  # fonction numérique
 
     def corde(x0, x1, eps, max_iter=1000):
-        # Vérification du changement de signe (déjà fait par balayage, mais bonne sécurité)
+        # Vérification du changement de signe
         if f(x0) * f(x1) > 0:
             return None
 
@@ -450,21 +396,23 @@ def cordesol():
                 if abs(x2 - x1) < eps:
                     return x2
 
-                x0, x1 = x1, x2 # Mise à jour de l'intervalle/points
+                x0, x1 = x1, x2
             except Exception:
-                return None # Erreur de calcul
+                return None
 
         return None # Échec si max_iter atteint
 
-    print("\n--- Méthode de la Corde (Sécan-Fausse Position) ---")
-    # Utilisation des globales a, b, eps
+    print("\n--- Méthode de la Corde  ---")
+    # Utilisation
     sol = corde(a, b, eps)
 
     if sol is not None:
         print(f"✔ Racine approchée : x ≈ {sol}")
         print(f"   f({sol}) = {f(sol)}")
     else:
-        print("❌ Échec de convergence ou pas de changement de signe sur l'intervalle.")
+        print(" Échec de convergence ou pas de changement de signe sur l'intervalle.")
 
+
+#GOGOGOGOGGOOGOGOGOGOGGOOGOGGGOOOGOGGOGOOGOOGOG
 # La fonction menu() gère le lancement et la boucle.
 menu()
